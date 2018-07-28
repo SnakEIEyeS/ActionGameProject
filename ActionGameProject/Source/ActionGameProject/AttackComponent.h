@@ -6,15 +6,33 @@
 #include "Components/ActorComponent.h"
 #include "AttackComponent.generated.h"
 
+class UAnimSequence;
 class UInputComponent;
 //struct FTimerHandle;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
+USTRUCT(BlueprintType)
+struct FAttackNode
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UAnimSequence* AttackAnim = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 NextLightAttackIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 NextHeavyAttackIndex = 0;
+};
+
+
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAMEPROJECT_API UAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UAttackComponent();
 
@@ -22,14 +40,30 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	UPROPERTY(EditAnywhere)
+		TArray<FAttackNode> AttackArray;
+
+	//UPROPERTY(VisibleInstanceOnly)
+	FAttackNode* CurrentAttack = nullptr;
+
+	//UPROPERTY(VisibleAnywhere)
+	FAttackNode* NextLightAttack = nullptr;
+
+	//UPROPERTY(VisibleAnywhere)
+	FAttackNode* NextHeavyAttack = nullptr;
+
 	UInputComponent* InputComponent = nullptr;
 	FTimerHandle ChainTimer;
 	uint32 AttackCount = 1;
+
+	const uint8 FirstLightAttack = 0;
+	const uint8 FirstHeavyAttack = 1;
+
 	bool bChain = false;	//Probably won't need bChain once animations trigger event to load next attack or to reset to 1st attack
 	bool bReadyToAttack = true;
 
@@ -41,9 +75,10 @@ private:
 	void OpenChainWindow();
 	void CloseChainWindow();
 
-	void ReadyNextAttack();
-	void ResetAttack();
+	void ReadyNextLightAttack();
+	void ReadyNextHeavyAttack();
+	void ResetAttacks();
 
-		
-	
+
+
 };
