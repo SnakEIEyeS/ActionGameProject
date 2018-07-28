@@ -2,6 +2,7 @@
 
 #include "AttackComponent.h"
 
+#include "Animation/AnimSequence.h"
 #include "Components/InputComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -25,7 +26,8 @@ void UAttackComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SetupInputComponent();
-	
+	ResetAttacks();
+
 }
 
 
@@ -44,11 +46,11 @@ void UAttackComponent::SetupInputComponent()
 	if (InputComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("InputComponent found on %s"), *(GetOwner()->GetName()))
-			
+
 		InputComponent->BindAction("LightAttack", IE_Pressed, this, &UAttackComponent::LightAttack);
 		InputComponent->BindAction("HeavyAttack", IE_Pressed, this, &UAttackComponent::HeavyAttack);
 	}
-	
+
 }
 
 void UAttackComponent::LightAttack()
@@ -59,6 +61,13 @@ void UAttackComponent::LightAttack()
 		{
 			AttackCount++;
 		}
+
+		if (NextLightAttack)
+		{
+			CurrentAttack = NextLightAttack;
+		}
+		ReadyNextLightAttack();
+		ReadyNextHeavyAttack();
 		bChain = false;
 
 		UE_LOG(LogTemp, Warning, TEXT("LightAttack Pressed, AttackCount: %d"), AttackCount);
@@ -76,10 +85,17 @@ void UAttackComponent::HeavyAttack()
 		{
 			AttackCount++;
 		}
+
+		if (NextHeavyAttack)
+		{
+			CurrentAttack = NextHeavyAttack;
+		}
+		ReadyNextLightAttack();
+		ReadyNextHeavyAttack();
 		bChain = false;
 
 		UE_LOG(LogTemp, Warning, TEXT("HeavyAttack Pressed, AttackCount: %d"), AttackCount)
-		GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UAttackComponent::OpenChainWindow, 1.f, false, 2.f);
+			GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UAttackComponent::OpenChainWindow, 1.f, false, 2.f);
 
 		bReadyToAttack = false;
 	}
@@ -89,7 +105,7 @@ void UAttackComponent::OpenChainWindow()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Chain Window opened"))
 
-	bChain = true;
+		bChain = true;
 	bReadyToAttack = true;
 
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
@@ -100,18 +116,43 @@ void UAttackComponent::CloseChainWindow()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Chain Window closed"))
 
-	bChain = false;
+		bChain = false;
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
-	ResetAttack();
+	ResetAttacks();
 }
 
-void UAttackComponent::ReadyNextAttack()
+void UAttackComponent::ReadyNextLightAttack()
 {
+	if (CurrentAttack)
+	{
+		NextLightAttack = &AttackArray[CurrentAttack->NextLightAttackIndex];
+	}
 }
 
-void UAttackComponent::ResetAttack()
+void UAttackComponent::ReadyNextHeavyAttack()
+{
+	if (CurrentAttack)
+	{
+		NextHeavyAttack = &AttackArray[CurrentAttack->NextHeavyAttackIndex];
+	}
+}
+
+void UAttackComponent::ResetAttacks()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack Reset"))
+
+	if (&AttackArray[FirstLightAttack])
+	{
+		NextLightAttack = &AttackArray[FirstLightAttack];
+	}	
+
+	if (&AttackArray[FirstHeavyAttack])
+	{
+		NextHeavyAttack = &AttackArray[FirstHeavyAttack];
+	}
+
+
+	CurrentAttack = nullptr;
 
 	AttackCount = 0;
 	bReadyToAttack = true;
