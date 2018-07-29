@@ -7,6 +7,7 @@
 #include "CombatComponent.generated.h"
 
 class UAnimSequence;
+class UCombatAnimInstance;
 class UInputComponent;
 //struct FTimerHandle;
 
@@ -46,7 +47,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-		TArray<FAttackNode> AttackArray;
+	TArray<FAttackNode> AttackArray;
 
 	//UPROPERTY(VisibleInstanceOnly)
 	FAttackNode* CurrentAttack = nullptr;
@@ -57,6 +58,7 @@ private:
 	//UPROPERTY(VisibleAnywhere)
 	FAttackNode* NextHeavyAttack = nullptr;
 
+	UCombatAnimInstance* CombatAnimInstance = nullptr;
 	UInputComponent* InputComponent = nullptr;
 	FTimerHandle ChainTimer;
 	uint32 AttackCount = 1;
@@ -67,6 +69,7 @@ private:
 	bool bChain = false;	//Probably won't need bChain once animations trigger event to load next attack or to reset to 1st attack
 	bool bReadyToAttack = true;
 
+	void SetupCombatAnimInstance();
 	void SetupInputComponent();
 
 	void LightAttack();

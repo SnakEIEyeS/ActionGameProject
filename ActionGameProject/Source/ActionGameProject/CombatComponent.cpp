@@ -3,7 +3,9 @@
 #include "CombatComponent.h"
 
 #include "Animation/AnimSequence.h"
+#include "CombatAnimInstance.h"
 #include "Components/InputComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "TimerManager.h"
@@ -25,6 +27,7 @@ void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetupCombatAnimInstance();
 	SetupInputComponent();
 	ResetAttacks();
 
@@ -39,6 +42,16 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
+void UCombatComponent::SetupCombatAnimInstance()
+{
+	CombatAnimInstance = Cast<UCombatAnimInstance>(GetOwner()->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance());
+
+	if (CombatAnimInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatAnimInstance found on %s"), *(GetOwner()->GetName()))
+	}
+}
+
 void UCombatComponent::SetupInputComponent()
 {
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
@@ -47,7 +60,7 @@ void UCombatComponent::SetupInputComponent()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("InputComponent found on %s"), *(GetOwner()->GetName()))
 
-			InputComponent->BindAction("LightAttack", IE_Pressed, this, &UCombatComponent::LightAttack);
+		InputComponent->BindAction("LightAttack", IE_Pressed, this, &UCombatComponent::LightAttack);
 		InputComponent->BindAction("HeavyAttack", IE_Pressed, this, &UCombatComponent::HeavyAttack);
 	}
 
@@ -63,7 +76,12 @@ void UCombatComponent::LightAttack()
 		}
 
 		if (NextLightAttack)
+		{
 			CurrentAttack = NextLightAttack;
+			CombatAnimInstance->SetAttacking(true);
+			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
+		}
+
 		ReadyNextLightAttack();
 		ReadyNextHeavyAttack();
 		bChain = false;
@@ -85,7 +103,12 @@ void UCombatComponent::HeavyAttack()
 		}
 
 		if (NextHeavyAttack)
+		{
 			CurrentAttack = NextHeavyAttack;
+			CombatAnimInstance->SetAttacking(true);
+			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
+		}
+			
 		ReadyNextLightAttack();
 		ReadyNextHeavyAttack();
 		bChain = false;
@@ -101,7 +124,7 @@ void UCombatComponent::OpenChainWindow()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Chain Window opened"))
 
-		bChain = true;
+	bChain = true;
 	bReadyToAttack = true;
 
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
@@ -112,7 +135,7 @@ void UCombatComponent::CloseChainWindow()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Chain Window closed"))
 
-		bChain = false;
+	bChain = false;
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
 	ResetAttacks();
 }
@@ -120,28 +143,37 @@ void UCombatComponent::CloseChainWindow()
 void UCombatComponent::ReadyNextLightAttack()
 {
 	if (CurrentAttack)
+	{
 		NextLightAttack = &AttackArray[CurrentAttack->NextLightAttackIndex];
+	}
 }
 
 void UCombatComponent::ReadyNextHeavyAttack()
 {
 	if (CurrentAttack)
+	{
 		NextHeavyAttack = &AttackArray[CurrentAttack->NextHeavyAttackIndex];
+	}
 }
 
 void UCombatComponent::ResetAttacks()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack Reset"))
 
-		if (&AttackArray[FirstLightAttack])
-			NextLightAttack = &AttackArray[FirstLightAttack];
+	if (&AttackArray[FirstLightAttack])
+	{
+		NextLightAttack = &AttackArray[FirstLightAttack];
+	}
 
 	if (&AttackArray[FirstHeavyAttack])
+	{
 		NextHeavyAttack = &AttackArray[FirstHeavyAttack];
+	}
 
 	CurrentAttack = nullptr;
 
 	AttackCount = 0;
 	bReadyToAttack = true;
+	CombatAnimInstance->SetAttacking(false);
 }
 
