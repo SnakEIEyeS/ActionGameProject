@@ -28,9 +28,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetAttacking();
 
-private:
+protected:
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	bool m_bAttacking = false;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UAnimSequence* m_AttackAnim = nullptr;
 
-	bool m_bAttacking = false;
+private:
 	
 };
