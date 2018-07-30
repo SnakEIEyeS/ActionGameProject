@@ -87,7 +87,7 @@ void UCombatComponent::LightAttack()
 		bChain = false;
 
 		UE_LOG(LogTemp, Warning, TEXT("LightAttack Pressed, AttackCount: %d"), AttackCount);
-		GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 1.f);
+		//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 1.f);
 
 		bReadyToAttack = false;
 	}
@@ -114,7 +114,7 @@ void UCombatComponent::HeavyAttack()
 		bChain = false;
 
 		UE_LOG(LogTemp, Warning, TEXT("HeavyAttack Pressed, AttackCount: %d"), AttackCount)
-			GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 2.f);
+			//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 2.f);
 
 		bReadyToAttack = false;
 	}
@@ -128,7 +128,7 @@ void UCombatComponent::OpenChainWindow()
 	bReadyToAttack = true;
 
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
-	GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::CloseChainWindow, 1.f, false, 2.f);
+	//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::CloseChainWindow, 1.f, false, 2.f);
 }
 
 void UCombatComponent::CloseChainWindow()

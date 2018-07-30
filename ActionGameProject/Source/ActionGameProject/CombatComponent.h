@@ -45,6 +45,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void OpenChainWindow();
+	void CloseChainWindow();
+
 private:
 	UPROPERTY(EditAnywhere)
 	TArray<FAttackNode> AttackArray;
@@ -74,9 +77,6 @@ private:
 
 	void LightAttack();
 	void HeavyAttack();
-
-	void OpenChainWindow();
-	void CloseChainWindow();
 
 	void ReadyNextLightAttack();
 	void ReadyNextHeavyAttack();
