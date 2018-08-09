@@ -3,16 +3,17 @@
 #include "CombatAnimInstance.h"
 
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimMontage.h"
 
 
-void UCombatAnimInstance::SetAttackAnim(UAnimSequence* i_AttackAnim)
+void UCombatAnimInstance::SetAttackAnim(UAnimMontage* i_AttackAnim)
 {
 	m_AttackAnim = i_AttackAnim;
 
 	UE_LOG(LogTemp, Warning, TEXT("SetAttackAnim got called!"))
 }
 
-UAnimSequence* UCombatAnimInstance::GetAttackAnim()
+UAnimMontage* UCombatAnimInstance::GetAttackAnim()
 {
 	return m_AttackAnim;
 }

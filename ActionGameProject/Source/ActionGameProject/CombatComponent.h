@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+class UAnimMontage;
 class UAnimSequence;
 class UCombatAnimInstance;
 class UInputComponent;
@@ -17,8 +18,11 @@ struct FAttackNode
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UAnimSequence* AttackAnim = nullptr;
+		//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		//UAnimSequence* AttackAnim = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UAnimMontage* AttackAnim = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 NextLightAttackIndex = 0;
