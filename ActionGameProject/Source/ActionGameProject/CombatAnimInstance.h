@@ -8,6 +8,7 @@
 
 
 class UAnimSequence;
+class UAnimMontage;
 
 /**
  * 
@@ -19,9 +20,9 @@ class ACTIONGAMEPROJECT_API UCombatAnimInstance : public UAnimInstance
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetAttackAnim(UAnimSequence* i_AttackAnim);
+	void SetAttackAnim(UAnimMontage* i_AttackAnim);
 	UFUNCTION(BlueprintCallable)
-	UAnimSequence* GetAttackAnim();
+	UAnimMontage* GetAttackAnim();
 
 	UFUNCTION(BlueprintCallable)
 	void SetAttacking(bool i_bAttacking);
@@ -33,7 +34,7 @@ protected:
 	bool m_bAttacking = false;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	UAnimSequence* m_AttackAnim = nullptr;
+	UAnimMontage* m_AttackAnim = nullptr;
 
 private:
 	

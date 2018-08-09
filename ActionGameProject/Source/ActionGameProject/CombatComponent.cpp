@@ -3,6 +3,7 @@
 #include "CombatComponent.h"
 
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimMontage.h"
 #include "CombatAnimInstance.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -80,6 +81,10 @@ void UCombatComponent::LightAttack()
 			CurrentAttack = NextLightAttack;
 			CombatAnimInstance->SetAttacking(true);
 			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
+
+			///TODO Put montage play in the right place
+			///TODO Change montage play rate
+			CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
 		}
 
 		ReadyNextLightAttack();
@@ -107,6 +112,10 @@ void UCombatComponent::HeavyAttack()
 			CurrentAttack = NextHeavyAttack;
 			CombatAnimInstance->SetAttacking(true);
 			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
+
+			///TODO Put montage play in the right place
+			///TODO Change montage play rate
+			CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
 		}
 			
 		ReadyNextLightAttack();
