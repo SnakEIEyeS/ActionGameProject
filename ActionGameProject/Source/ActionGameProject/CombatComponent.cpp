@@ -60,7 +60,7 @@ void UCombatComponent::SetupInputComponent()
 	if (InputComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("InputComponent found on %s"), *(GetOwner()->GetName()))
-
+			
 		InputComponent->BindAction("LightAttack", IE_Pressed, this, &UCombatComponent::LightAttack);
 		InputComponent->BindAction("HeavyAttack", IE_Pressed, this, &UCombatComponent::HeavyAttack);
 	}
@@ -69,7 +69,7 @@ void UCombatComponent::SetupInputComponent()
 
 void UCombatComponent::LightAttack()
 {
-	if (bReadyToAttack)
+	if (bReadyForAtkInput)
 	{
 		if (bChain)
 		{
@@ -78,29 +78,26 @@ void UCombatComponent::LightAttack()
 
 		if (NextLightAttack)
 		{
-			CurrentAttack = NextLightAttack;
-			CombatAnimInstance->SetAttacking(true);
-			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
-
-			///TODO Put montage play in the right place
-			///TODO Change montage play rate
-			CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
+			PendingAttack = NextLightAttack;
+			bReadyForAtkInput = false;
+			UE_LOG(LogTemp, Warning, TEXT("LightAttack Pressed"));
+			if (bReadyToAttack)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Executing LightAttack because ReadyToAttack"));
+				ExecuteAttack();
+			}
 		}
 
-		ReadyNextLightAttack();
-		ReadyNextHeavyAttack();
 		bChain = false;
 
-		UE_LOG(LogTemp, Warning, TEXT("LightAttack Pressed, AttackCount: %d"), AttackCount);
+		
 		//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 1.f);
-
-		bReadyToAttack = false;
 	}
 }
 
 void UCombatComponent::HeavyAttack()
 {
-	if (bReadyToAttack)
+	if (bReadyForAtkInput)
 	{
 		if (bChain)
 		{
@@ -109,58 +106,62 @@ void UCombatComponent::HeavyAttack()
 
 		if (NextHeavyAttack)
 		{
-			CurrentAttack = NextHeavyAttack;
-			CombatAnimInstance->SetAttacking(true);
-			CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
-
-			///TODO Put montage play in the right place
-			///TODO Change montage play rate
-			CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
+			PendingAttack = NextHeavyAttack;
+			bReadyForAtkInput = false;
+			UE_LOG(LogTemp, Warning, TEXT("HeavyAttack Pressed"))
+			if (bReadyToAttack)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Executing HeavyAttack because ReadyToAttack"))
+				ExecuteAttack();
+			}
 		}
 			
-		ReadyNextLightAttack();
-		ReadyNextHeavyAttack();
 		bChain = false;
 
-		UE_LOG(LogTemp, Warning, TEXT("HeavyAttack Pressed, AttackCount: %d"), AttackCount)
-			//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 2.f);
-
-		bReadyToAttack = false;
+		//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::OpenChainWindow, 1.f, false, 2.f);
 	}
 }
 
 void UCombatComponent::OpenChainWindow()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Chain Window opened"))
+	/*UE_LOG(LogTemp, Warning, TEXT("Chain Window opened"))
 
 	bChain = true;
 	bReadyToAttack = true;
 
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
-	//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::CloseChainWindow, 1.f, false, 2.f);
+	//GetWorld()->GetTimerManager().SetTimer(ChainTimer, this, &UCombatComponent::CloseChainWindow, 1.f, false, 2.f);*/
 }
 
 void UCombatComponent::CloseChainWindow()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Chain Window closed"))
+	/*UE_LOG(LogTemp, Warning, TEXT("Chain Window closed"))
 
 	bChain = false;
 	GetWorld()->GetTimerManager().ClearTimer(ChainTimer);
-	ResetAttacks();
+	ResetAttacks();*/
 }
 
-void UCombatComponent::ReadyNextLightAttack()
+void UCombatComponent::HandleReadyToAttack(bool i_bReadyToAttack)
+{	
+	bReadyToAttack = i_bReadyToAttack;	
+	if (bReadyToAttack && PendingAttack)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Executing Attack because PendingAttack"));
+		ExecuteAttack();
+	}
+}
+
+void UCombatComponent::SetReadyForAtkInput(bool i_bReadyForAtkInput)	
+{	
+	bReadyForAtkInput = i_bReadyForAtkInput;	
+}
+
+void UCombatComponent::ReadyNextAttacks()
 {
 	if (CurrentAttack)
 	{
 		NextLightAttack = &AttackArray[CurrentAttack->NextLightAttackIndex];
-	}
-}
-
-void UCombatComponent::ReadyNextHeavyAttack()
-{
-	if (CurrentAttack)
-	{
 		NextHeavyAttack = &AttackArray[CurrentAttack->NextHeavyAttackIndex];
 	}
 }
@@ -183,6 +184,25 @@ void UCombatComponent::ResetAttacks()
 
 	AttackCount = 0;
 	bReadyToAttack = true;
+	bReadyForAtkInput = true;
+	PendingAttack = nullptr;
 	CombatAnimInstance->SetAttacking(false);
+}
+
+void UCombatComponent::ExecuteAttack()
+{
+	check(PendingAttack != nullptr && "PendingAttack was null");
+
+	CurrentAttack = PendingAttack;
+	CombatAnimInstance->SetAttacking(true);
+	CombatAnimInstance->SetAttackAnim(CurrentAttack->AttackAnim);
+
+	///TODO Put montage play in the right place
+	///TODO Change montage play rate
+	CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
+	bReadyToAttack = false;
+	PendingAttack = nullptr;
+
+	ReadyNextAttacks();
 }
 
