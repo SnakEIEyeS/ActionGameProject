@@ -46,11 +46,20 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root Attacks")
+	uint8 FirstLightAttack = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root Attacks")
+	uint8 FirstHeavyAttack = 1;
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void OpenChainWindow();
 	void CloseChainWindow();
+	void HandleReadyToAttack(bool i_bReadyToAttack);
+	void SetReadyForAtkInput(bool i_bReadyForAtkInput);
+
+	void ResetAttacks();
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -65,15 +74,15 @@ private:
 	//UPROPERTY(VisibleAnywhere)
 	FAttackNode* NextHeavyAttack = nullptr;
 
+	FAttackNode* PendingAttack = nullptr;
+
 	UCombatAnimInstance* CombatAnimInstance = nullptr;
 	UInputComponent* InputComponent = nullptr;
 	FTimerHandle ChainTimer;
 	uint32 AttackCount = 1;
 
-	const uint8 FirstLightAttack = 0;
-	const uint8 FirstHeavyAttack = 1;
-
 	bool bChain = false;	//Probably won't need bChain once animations trigger event to load next attack or to reset to 1st attack
+	bool bReadyForAtkInput = true;
 	bool bReadyToAttack = true;
 
 	void SetupCombatAnimInstance();
@@ -82,9 +91,8 @@ private:
 	void LightAttack();
 	void HeavyAttack();
 
-	void ReadyNextLightAttack();
-	void ReadyNextHeavyAttack();
-	void ResetAttacks();
+	void ExecuteAttack();
+	void ReadyNextAttacks();
 
 
 
