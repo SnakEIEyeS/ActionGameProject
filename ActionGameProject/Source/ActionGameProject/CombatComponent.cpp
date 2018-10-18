@@ -199,7 +199,7 @@ void UCombatComponent::ExecuteAttack()
 
 	///TODO Put montage play in the right place
 	///TODO Change montage play rate
-	CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 0.5f, EMontagePlayReturnType::MontageLength, 0.f, true);
+	CombatAnimInstance->Montage_Play(CurrentAttack->AttackAnim, 1.f, EMontagePlayReturnType::MontageLength, 0.f, true);
 	bReadyToAttack = false;
 	PendingAttack = nullptr;
 
