@@ -11,6 +11,9 @@
 #include "GameFramework/Pawn.h"
 #include "TimerManager.h"
 
+//#include "CombatAttacks/AttackNode.h"
+
+static const int32 MaxComboStringTextLength = 30;
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -18,6 +21,7 @@ UCombatComponent::UCombatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	m_ComboStringAsText.Reserve(MaxComboStringTextLength);
 
 	// ...
 }
@@ -71,6 +75,7 @@ void UCombatComponent::LightAttack()
 {
 	if (bReadyForAtkInput)
 	{
+		m_ComboStringAsText += "Punch-";
 		if (bChain)
 		{
 			AttackCount++;
@@ -99,6 +104,7 @@ void UCombatComponent::HeavyAttack()
 {
 	if (bReadyForAtkInput)
 	{
+		m_ComboStringAsText += "Kick-";
 		if (bChain)
 		{
 			AttackCount++;
@@ -166,6 +172,21 @@ void UCombatComponent::ReadyNextAttacks()
 	}
 }
 
+void UCombatComponent::LoadPauseAttacks()
+{
+	if (CurrentAttack)
+	{
+		if (CurrentAttack->NextPauseLightAttackIndex >= 0)
+		{
+			NextLightAttack = &AttackArray[CurrentAttack->NextPauseLightAttackIndex];
+		}
+		if (CurrentAttack->NextPauseHeavyAttackIndex >= 0)
+		{
+			NextHeavyAttack = &AttackArray[CurrentAttack->NextPauseHeavyAttackIndex];
+		}
+	}
+}
+
 void UCombatComponent::ResetAttacks()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack Reset"))
@@ -182,12 +203,18 @@ void UCombatComponent::ResetAttacks()
 
 	CurrentAttack = nullptr;
 
+	m_ComboStringAsText.Reset();
 	AttackCount = 0;
 	bReadyToAttack = true;
 	bReadyForAtkInput = true;
 	PendingAttack = nullptr;
 	CombatAnimInstance->SetAttacking(false);
 }
+
+//void UCombatComponent::GetCurrentAttackNotifies(TArray<FAnimNotifyEventReference>& OutActiveNotifies)
+//{
+//	CurrentAttack->AttackAnim->GetAnimNotifies(0.f, 1.f, false, OutActiveNotifies);
+//}
 
 void UCombatComponent::ExecuteAttack()
 {

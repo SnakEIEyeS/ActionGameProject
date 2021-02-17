@@ -21,3 +21,14 @@ public:
 	bool bReadyToAttack = true;
 	
 };
+
+UCLASS()
+class ACTIONGAMEPROJECT_API ULoadPauseAttacksNotify : public UAnimNotify
+{
+	GENERATED_BODY()
+
+		virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+public:
+
+};

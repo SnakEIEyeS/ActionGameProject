@@ -2,17 +2,20 @@
 
 #include "ResetAttacksNotify.h"
 
-#include "CombatComponent.h"
+#include "../CombatComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
 
 void UResetAttacksNotify::Notify(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {
-	UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
-
-	if (CombatComponent)
+	if (MeshComp && MeshComp->GetOwner())
 	{
-		CombatComponent->ResetAttacks();
+		UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
+
+		if (CombatComponent)
+		{
+			CombatComponent->ResetAttacks();
+		}
 	}
 }
 
