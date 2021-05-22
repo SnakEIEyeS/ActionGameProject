@@ -41,6 +41,8 @@ struct FAttackNode
 };
 
 
+//TODO: separate input from CombatComp so that this can be used on AI but different input types (Player or AI) can call funcs on this 
+//in same style but based on different processing
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAMEPROJECT_API UCombatComponent : public UActorComponent
 {

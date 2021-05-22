@@ -11,8 +11,6 @@
 #include "GameFramework/Pawn.h"
 #include "TimerManager.h"
 
-//#include "CombatAttacks/AttackNode.h"
-
 static const int32 MaxComboStringTextLength = 30;
 
 // Sets default values for this component's properties
