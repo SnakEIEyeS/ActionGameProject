@@ -6,13 +6,14 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+class InputEvaluatorBase;
 class UAnimMontage;
 class UAnimSequence;
 class UCombatAnimInstance;
 class UInputComponent;
 //struct FTimerHandle;
 
-
+//struct FAttackNode;
 USTRUCT(BlueprintType)
 struct FAttackNode
 {
@@ -22,6 +23,9 @@ struct FAttackNode
 		//UAnimSequence* AttackAnim = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FName AttackName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UAnimMontage* AttackAnim = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -29,9 +33,17 @@ struct FAttackNode
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 NextHeavyAttackIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 NextPauseLightAttackIndex = -1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 NextPauseHeavyAttackIndex = -1;
 };
 
 
+//TODO: separate input from CombatComp so that this can be used on AI but different input types (Player or AI) can call funcs on this 
+//in same style but based on different processing
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAMEPROJECT_API UCombatComponent : public UActorComponent
 {
@@ -44,6 +56,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root Attacks")
@@ -59,9 +72,26 @@ public:
 	void HandleReadyToAttack(bool i_bReadyToAttack);
 	void SetReadyForAtkInput(bool i_bReadyForAtkInput);
 
+	void LoadPauseAttacks();
 	void ResetAttacks();
 
+	UFUNCTION(BlueprintCallable)
+	inline UAnimMontage* GetCurrentAttackMontage() { return CurrentAttack->AttackAnim; }
+
+	UFUNCTION(BlueprintCallable)
+	inline bool IsReadyForAttackInput() { return bReadyForAtkInput; }
+
+	UFUNCTION(BlueprintCallable)
+	inline bool IsAttackPending() { return PendingAttack ? true : false; }
+	//UFUNCTION(BlueprintCallable)
+	//void GetCurrentAttackNotifies(TArray<FAnimNotifyEventReference>& OutActiveNotifies);
+
+	UFUNCTION(BlueprintCallable)
+	inline FString GetComboStringText() { return m_ComboStringAsText; }
+
 private:
+	InputEvaluatorBase* m_pInputEvaluator = nullptr;	//SHMANE TODO garbage collection on this
+
 	UPROPERTY(EditAnywhere)
 	TArray<FAttackNode> AttackArray;
 
@@ -78,6 +108,7 @@ private:
 
 	UCombatAnimInstance* CombatAnimInstance = nullptr;
 	UInputComponent* InputComponent = nullptr;
+	FString m_ComboStringAsText;
 	FTimerHandle ChainTimer;
 	uint32 AttackCount = 1;
 
@@ -93,7 +124,6 @@ private:
 
 	void ExecuteAttack();
 	void ReadyNextAttacks();
-
-
+	
 
 };

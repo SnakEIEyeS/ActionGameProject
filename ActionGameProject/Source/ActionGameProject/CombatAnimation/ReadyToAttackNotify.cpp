@@ -2,16 +2,32 @@
 
 #include "ReadyToAttackNotify.h"
 
-#include "CombatComponent.h"
+#include "../CombatComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
 
 void UReadyToAttackNotify::Notify(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {
-	UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
-
-	if (CombatComponent)
+	if (MeshComp && MeshComp->GetOwner())
 	{
-		CombatComponent->HandleReadyToAttack(bReadyToAttack);
+		UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
+
+		if (CombatComponent)
+		{
+			CombatComponent->HandleReadyToAttack(bReadyToAttack);
+		}
+	}
+}
+
+void ULoadPauseAttacksNotify::Notify(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
+{
+	if (MeshComp && MeshComp->GetOwner())
+	{
+		UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
+
+		if (CombatComponent)
+		{
+			CombatComponent->LoadPauseAttacks();
+		}
 	}
 }

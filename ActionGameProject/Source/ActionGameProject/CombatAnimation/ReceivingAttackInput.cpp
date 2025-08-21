@@ -2,16 +2,22 @@
 
 #include "ReceivingAttackInput.h"
 
-#include "CombatComponent.h"
+#include "../CombatComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
 
+#include "Engine/World.h"
+
 void UReceivingAttackInput::Notify(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {
-	UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
-
-	if (CombatComponent)
+	if (MeshComp && MeshComp->GetOwner())
 	{
-		CombatComponent->SetReadyForAtkInput(bReceivingAttackInput);
+		UCombatComponent* CombatComponent = MeshComp->GetOwner()->FindComponentByClass<UCombatComponent>();
+
+		if (CombatComponent)
+		{
+			CombatComponent->SetReadyForAtkInput(bReceivingAttackInput);
+		}
 	}
+	
 }
