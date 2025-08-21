@@ -10,9 +10,10 @@ struct FInputData
 	GENERATED_BODY()
 
 	FInputData();
-	FInputData(uint64 frameNumber);
+	FInputData(uint64 frameNumber, float timeStamp);
 
 	int64 m_frameNumber;
+	float m_timeStamp;
 
 	uint8 m_faceButtonBottom : 1;	//Gamepad_FaceButton_Bottom
 	uint8 m_faceButtonLeft : 1;		//Gamepad_FaceButton_Left
@@ -32,10 +33,14 @@ struct FInputData
 	//Gamepad_LeftThumbstick
 	//Gamepad_RightThumbstick
 
-	//Gamepad_LeftX
-	//Gamepad_LeftY
-	//Gamepad_RightX
-	//Gamepad_RightY
+	//SHMANE TODO these seem to have a value in only 1 component of the vector
+	FVector m_leftThumbstick_X;		//Gamepad_LeftX
+	FVector m_leftThumbstick_Y;		//Gamepad_LeftY
+	FVector m_rightThumbstick_X;	//Gamepad_RightX
+	FVector m_rightThumbstick_Y;	//Gamepad_RightY
+
+	float m_leftThumbstick_DistanceSquared;		//Square of Distance on the unit circle that Left Thumbstick can move along
+	float m_leftThumbstick_Distance;			//Distance on the unit circle that Left Thumbstick can move along
 
 };
 
@@ -58,10 +63,16 @@ public:
 	virtual void Destroyed() override;
 
 	FORCEINLINE void SetPlayerController(APlayerController* playerController) {	m_pPlayerController = playerController;	}
+
+	FORCEINLINE TSharedPtr<TCircularBuffer<FInputData>> GetBuffer() const { return m_pBuffer; }
+	//TODO Add Get last wite idx
+	FORCEINLINE const uint32 GetLastWriteIndex() const { return m_pBuffer->GetPreviousIndex(m_nextWriteIndex); }
+
+	//SHMANE TODO add these to public interface - GetInputDataAtTime(), GetNextInputData(), GetIndexAtTime()
 protected:
 
 private:
 	TSharedPtr<TCircularBuffer<FInputData>> m_pBuffer;
-	APlayerController* m_pPlayerController;
+	APlayerController* m_pPlayerController;	//SHMANE TODO is this garbage collected?
 	uint32 m_nextWriteIndex = 0;
 };

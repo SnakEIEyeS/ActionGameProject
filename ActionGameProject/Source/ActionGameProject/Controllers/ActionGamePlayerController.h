@@ -20,10 +20,14 @@ public:
 	AActionGamePlayerController();
 
 	virtual void BeginPlay() override;
+	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	virtual void Destroyed() override;
+
+	FORCEINLINE AInputBuffer* GetInputBuffer() const { return m_pInputBuffer; }
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = InputBuffer, meta = (AllowPrivateAccess = "true"))
-	AInputBuffer* m_pInputBuffer;
+	AInputBuffer* m_pInputBuffer = nullptr;
+	
 	
 };

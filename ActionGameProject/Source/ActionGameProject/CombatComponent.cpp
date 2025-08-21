@@ -2,6 +2,7 @@
 
 #include "CombatComponent.h"
 
+#include "Controllers/ActionGamePlayerController.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimMontage.h"
 #include "CombatAnimInstance.h"
@@ -9,6 +10,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
+#include "Input/AttackInputDirectionEvaluator.h"
+#include "Input/InputEvaluator.h"
 #include "TimerManager.h"
 
 static const int32 MaxComboStringTextLength = 30;
@@ -34,8 +37,23 @@ void UCombatComponent::BeginPlay()
 	SetupInputComponent();
 	ResetAttacks();
 
+	APawn* pawnOwner = CastChecked<APawn>(GetOwner());
+	AActionGamePlayerController* playerController = CastChecked<AActionGamePlayerController>(pawnOwner->Controller);	//SHMANE TODO find a better way than casting
+	m_pInputEvaluator = new AttackInputDirectionEvaluator();	//SHMANE TODO remove dependency on implementation class
+	m_pInputEvaluator->SetInputBuffer(playerController->GetInputBuffer());
+
 }
 
+void UCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (m_pInputEvaluator)
+	{
+		delete m_pInputEvaluator;
+		m_pInputEvaluator = nullptr;
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
 
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -71,6 +89,23 @@ void UCombatComponent::SetupInputComponent()
 
 void UCombatComponent::LightAttack()
 {
+	AttackInputDirectionEvaluator* attackInputDirEvaluator = static_cast<AttackInputDirectionEvaluator*>(m_pInputEvaluator);
+	if (attackInputDirEvaluator)
+	{
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EDirectionName"), true);
+		//if (!EnumPtr) return NSLOCTEXT("Invalid", "Invalid", "Invalid");
+
+		EDirectionName attackDirection = attackInputDirEvaluator->GetAttackInputDirection(GetOwner()->GetActorTransform());
+		//EnumPtr->GetDisplayNameText(attackDirection);
+		if (EnumPtr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Attack Direction: %s"), *(EnumPtr->GetDisplayValueAsText(attackDirection).ToString())));
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Attack Direction: %i"), attackDirection));
+		}
+	}
 	if (bReadyForAtkInput)
 	{
 		m_ComboStringAsText += "Punch-";

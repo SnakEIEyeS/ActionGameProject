@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+class InputEvaluatorBase;
 class UAnimMontage;
 class UAnimSequence;
 class UCombatAnimInstance;
@@ -55,6 +56,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Root Attacks")
@@ -88,6 +90,8 @@ public:
 	inline FString GetComboStringText() { return m_ComboStringAsText; }
 
 private:
+	InputEvaluatorBase* m_pInputEvaluator = nullptr;	//SHMANE TODO garbage collection on this
+
 	UPROPERTY(EditAnywhere)
 	TArray<FAttackNode> AttackArray;
 
